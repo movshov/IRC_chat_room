@@ -1,7 +1,7 @@
 import socket
 import select
 import sys
-from thread import * 
+from _thread import*
 
 
 """Set up server connection
@@ -25,9 +25,9 @@ else:
     Port = int(sys.argv[2])
 
 # using the above information bind the server to the desired IP_Adress and Port Number. 
-server.bind((IP_Adress, Port))
+irc_server.bind((IP_Address, Port))
 
-server.listen(100)
+irc_server.listen(100)
 list_of_clients = []
 
 def clientthread(conn, addr):
@@ -62,27 +62,13 @@ def remove(connection):
         list_of_clients.remove(connection)
 
 while True:
-    conn, addr = server.accept()
+    conn, addr = irc_server.accept()
     list_of_clients.append(conn)
     print(addr[0] + " connected")
     start_new_thread(clientthread,(conn,addr))
 
 conn.close()
-server.close()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+irc_server.close()
 
 
 
