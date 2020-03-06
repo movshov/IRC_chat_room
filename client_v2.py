@@ -3,8 +3,7 @@ import select
 import errno #used for mathcing error codes. 
 import sys
 
-
-HEADER_LENGTH = 20
+HEADER_LENGTH = 40
 IP = "127.0.0.1"
 PORT = 1234
 
@@ -54,8 +53,52 @@ while True:
         pass
 
 
+    def create_room():
+        """Send a message to the server starting with the keyword 
+           CREATE letting the server know that we want to create a 
+           new room on the server.
+        """
+        print("What is the name of the room you would like to create?\n")
+        room_name = input(f"{room_name} > ") #grab the room name from the user.
+        message = "CREATE" + room_name 
+
+        message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+        client_socket.send(message_header + message)
 
 
+    def leave_room():
+        """Send a message to the server starting with the Keyword
+           LEAVE letting the server know that this person wishes 
+           to leave a room.
+        """
+        print("Which room would you like to leave?\n")
+        room_name = input(f"{room_name} > ") #grab the room name from the user.
+        message = "LEAVE" + room_name 
+
+        message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+        client_socket.send(message_header + message)
+
+
+    def list_rooms():
+        """Send a message to the server starting with the keyword 
+           LIST letting the server know that this person wished to
+           see all the rooms that are available on this server. 
+        """
+        message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+        message = "LIST"
+        client_socket.send(message_header + message)
+
+
+    def join_room():
+        """Send a message to the server starting with the keyword
+           JOIN letting the server know that this person wishes to 
+           join this specific room. 
+        """ 
+        print("Which room would you like to join?\n")
+        room_name = input(f"{room_name} > ") #grab the room name from the user.
+        message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+        message = "JOIN" + room_name
+        client_socket.send(message_header + message)
 
 
 
