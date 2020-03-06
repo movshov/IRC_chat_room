@@ -38,7 +38,7 @@ while True:
         if notified_socket == server_socket:
             client_socket, client_address = server_socket.accept()
 
-            user = recieve_message(client_socket)
+            user = receive_message(client_socket)
             if user is False:
                 continue
             
@@ -49,7 +49,7 @@ while True:
             print(f"Accepted new connection from {client_address[0]}:{client_address[1]} username:{user['data'].decode('utf-8')}")
 
         else:
-            message = recieve_messsage(notified_socket) 
+            message = receive_message(notified_socket) 
             if message is False:
                 print(f"closed connection from {clients[notified_socket]['data'].decode('utf-8')}")
                 sockets_list.remove(notified_socket)
@@ -64,7 +64,7 @@ while True:
                 if client_socket != notified_socket:
                     client_socket.send(user['header'] + user['data'] + message['header'] + message['data'])
 
-    for notified_socket in exception_sockets:
+    for notified_socket in exception_socket:
         sockets_list.remove(notified_socket)
         del clients[notified_socket]
 
