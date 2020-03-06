@@ -14,7 +14,30 @@ server_socket.listen()
 sockets_list = [server_socket]
 
 clients = {}
-rooms = []
+rooms = []  # List of rooms by name only for quick display. 
+class_rooms = [] # List of all rooms using the class below for other functionality.
+
+class room():
+    members = [] # List of people that have joined this room. 
+
+    def __init__(self, name): # Constructor. 
+        self.name = name
+
+    def join(self, client_socket):
+        members.append(client_socket) # Add a client to the list of members in this room.
+
+    def leave(self, client_socket):
+        members.remove(client_socket) # Remove a client from the list of members.
+
+    def list_members(self): # List all members that are inside this room.
+        list = ""
+        for x in members:
+            print(x) # Displaying for server side(NOT NECESSARY). 
+            list += x + ","
+        return list # Return a list of all members of this room.
+
+ #   def message(self, message):
+
 
 def list_rooms():
     """list all rooms that are currently available 
@@ -23,16 +46,16 @@ def list_rooms():
     """
     print("inside list_rooms func")
     list = ""
-    for x in rooms:
+    for x in rooms: # Display for server side what rooms exits. 
         print(x)
-        list += x + ","
-    return list
+        list += (x + ',')
+    return list  # Return a list of all rooms. 
 
 
 def receive_message(client_socket):
     try:
         message_header = client_socket.recv(HEADER_LENGTH)
-        if not len(message_header):  #if we didn't get any data. 
+        if not len(message_header):  # If we didn't get any data. 
             return False
 
         message_length = int(message_header.decode("utf-8").strip())
@@ -71,21 +94,58 @@ while True:
 
             print(f"Recieved message from {user['data'].decode('utf-8')}: {message['data'].decode('utf-8')}")
 
-            for client_socket in clients:
-                if "CREATE" in message['data'].decode('utf-8'): #create a new room. 
-                    room = message['data'].decode('utf-8').replace('CREATE ', '')
-                    rooms.append(room)
-                    print("create room\n")
-                if "LIST" in message['data'].decode('utf-8'):    #List all rooms available.
-                    print("\ninside list\n")
-                    if client_socket == notified_socket:    #make sure we are the user who issued this command.
-                        all_rooms = list_rooms()
-                        print("all_rooms is: {}".format(all_rooms))
-                        message = all_rooms.encode('utf-8')
-                        message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
-                        client_socket.send(user['header'] + user['data'] + message_header + message) #Sending message 
-                    
-                if client_socket != notified_socket: #if we are not the ones who sent the message, send it.
+            # This is where we check for client commands such as CREATE, LIST, JOIN, LEAVE, ...
+            for client_socket in clients: 
+
+                if "CREATE" in message['data'].decode('utf-8'): # Create a new room. 
+                    temp_room = message['data'].decode('utf-8').replace('CREATE ', '')
+                    rooms.append(temp_room)
+                    class_rooms.append(temp_room) 
+                    print("created a new room: '{}'\n".format(temp_room))
+
+                if "LIST" in message['data'].decode('utf-8'): # List all rooms available.
+                    if client_socket == notified_socket:    # Make sure we are the user who issued this command.
+                        if len(rooms) == 0:
+                            print("Error, there are currently no rooms to list")
+                        else:
+                            all_rooms = list_rooms()
+                            message = all_rooms.encode('utf-8')
+                            message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                            user_header = user['header']
+                            user_data = user['data']
+                            client_socket.send(user['header'] + user['data'] + message_header + message) #Sending message 
+
+                if "JOIN" in message['data'].decode('utf-8'): # List all rooms available.
+                    if client_socket == notified_socket:    # Make sure we are the user who issued this command.
+                        temp_room = message['data'].decode('utf-8').replace('JOIN ', '')
+                        if temp_room in rooms:  # Make sure the room we are trying to join exists first. 
+                           class_rooms[temp_room].join(client_socket) # Call Join method in class room. 
+                        else:
+                            print("Error attempting to join room. Make sure you are spelling the room correctly.\n")
+
+                if "LEAVE" in message['data'].decode('utf-8'): # Leave a specific room.
+                    if client_socket == notified_socket:    # Make sure we are the user who issued this command.
+                        temp_room = message['data'].decode('utf-8').replace('LEAVE ', '')
+                        if temp_room in rooms:  # Make sure the room we are trying to join exists first. 
+                           class_rooms[temp_room].leave(client_socket) # Call Join method in class room. 
+                        else:
+                            print("Error attempting to leave room. Make sure you are spelling the room correctly.\n")
+
+                if "LIST_MEM" in message['data'].decode('utf-8'): # List all members of a specific room.
+                    if client_socket == notified_socket:    # Make sure we are the user who issued this command.
+                        temp_room = message['data'].decode('utf-8').replace('LIST_MEM', '')
+                        if temp_room in rooms:  # Make sure the room we are trying to join exists first. 
+                           room_members = class_rooms[temp_room].list_members() # Call list_members method in class room. 
+                           message = room_members.encode('utf-8')
+                           message_header = f"{len(message):<{HEADER_LENGTH}}".encode('utf-8')
+                           client_socket.send(user['header'] + user['data'] + message_header + message) #Sending message 
+                        else:
+                            print("Error attempting to leave room. Make sure you are spelling the room correctly.\n")
+
+
+
+
+                if client_socket != notified_socket: # If we are not the ones who sent the message, send it.
                     client_socket.send(user['header'] + user['data'] + message['header'] + message['data'])
 
     for notified_socket in exception_socket:
