@@ -32,7 +32,7 @@ list_of_clients = []
 
 def clientthread(conn, addr):
     # sends a message to the client whose user obj is conn
-    conn.send("welcome to this chat room.")
+    conn.send("welcome to this chat room.".encode())
 
     while True:
         try: 
@@ -55,6 +55,8 @@ def broadcast(message, connection):
                 clients.send(message)
             except:
                 clients.close()
+
+
                 remove(clients)
 
 def remove(connection):
