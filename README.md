@@ -29,12 +29,12 @@ sudo apt-get upgrade python3
 To run the program you will need at least two terminals open. First, we are going to be setting up the IRC server.
 To do so run the following command:
 ```
-python3 server.py
+python3 server_v2.py
 ```
 
 Now that the server is running we can create a client by running the following command:
 ```
-python3 client.py
+python3 client_v2.py
 ```
 
 Now we are ready to begin using the program. 
